@@ -136,9 +136,21 @@ export interface ISlackChannelConfiguration extends cdk.IResource, iam.IGrantabl
   readonly role?: iam.IRole;
 
   /**
+   * The SNS topics that deliver notifications to AWS Chatbot.
+   * @attribute
+   */
+  readonly notificationTopics: sns.ITopic[];
+
+  /**
    * Adds a statement to the IAM role.
    */
   addToRolePolicy(statement: iam.PolicyStatement): void;
+
+  /**
+   * Adds a SNS topic that deliver notifications to AWS Chatbot.
+   * @param notificationTopic
+   */
+  addNotificationTopic(notificationTopic: sns.ITopic): void
 
   /**
    * Return the given named metric for this SlackChannelConfiguration
@@ -157,6 +169,8 @@ abstract class SlackChannelConfigurationBase extends cdk.Resource implements ISl
   abstract readonly grantPrincipal: iam.IPrincipal;
 
   abstract readonly role?: iam.IRole;
+
+  abstract readonly notificationTopics: sns.ITopic[];
 
   /**
    * Adds extra permission to iam-role of Slack channel configuration
@@ -193,6 +207,14 @@ abstract class SlackChannelConfigurationBase extends cdk.Resource implements ISl
       targetAddress: this.slackChannelConfigurationArn,
     };
   }
+
+  /**
+   * Adds a SNS topic that deliver notifications to AWS Chatbot.
+   * @param notificationTopic
+   */
+  public addNotificationTopic(notificationTopic: sns.ITopic): void {
+    this.notificationTopics.push(notificationTopic);
+  }
 }
 
 /**
@@ -224,6 +246,7 @@ export class SlackChannelConfiguration extends SlackChannelConfigurationBase {
       readonly slackChannelConfigurationArn = slackChannelConfigurationArn;
       readonly role?: iam.IRole = undefined;
       readonly grantPrincipal: iam.IPrincipal;
+      readonly notificationTopics: sns.ITopic[] = [];
 
       /**
        * Returns a name of Slack channel configuration
@@ -277,7 +300,7 @@ export class SlackChannelConfiguration extends SlackChannelConfigurationBase {
    * The SNS topic that deliver notifications to AWS Chatbot.
    * @attribute
    */
-  private readonly notificationTopics: sns.ITopic[];
+  readonly notificationTopics: sns.ITopic[];
 
   constructor(scope: Construct, id: string, props: SlackChannelConfigurationProps) {
     super(scope, id, {
